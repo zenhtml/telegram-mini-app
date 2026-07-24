@@ -63,6 +63,9 @@ These are non-obvious and cost significant debugging to discover:
   (`miniApp`, `themeParams`, `mainButton`, …). Call `component.mount()` in an
   effect and `component.unmount()` on cleanup. Reading signals before mount
   returns empty/default values.
+- **`hapticFeedback` does NOT need mounting** — unlike other SDK components,
+  `impactOccurred`, `notificationOccurred` and `selectionChanged` call
+  `postEvent` directly and work immediately after SDK `init()`.
 - **Reactivity model:** properties like `themeParams.textColor` are signals
   (callable getters). Subscribe in React via `useSignal(themeParams.textColor)`.
   Read launch/user data via `useLaunchParams()`.

@@ -91,7 +91,8 @@ User"), mock theme colors, and working UI controls.
 
 ```
 .
-├── .github/workflows/deploy.yml   # CI: build + deploy to GitHub Pages
+├── .github/workflows/deploy.yml   # CI: lint + test + build + deploy
+├── .prettierrc.json               # Prettier config
 ├── index.html                     # Vite entry HTML
 ├── vite.config.ts                 # Vite config (relative base, React plugin)
 ├── vitest.config.ts               # Vitest config (jsdom, globals, setup file)
@@ -99,8 +100,10 @@ User"), mock theme colors, and working UI controls.
 ├── tsconfig.json                  # TS project references root
 ├── tsconfig.app.json              # TS config for src/
 ├── tsconfig.node.json             # TS config for vite.config.ts + vitest.config.ts
+├── AGENTS.md                      # Agent guide (commands, architecture, gotchas)
+├── TODO.md                        # Planned improvements
 └── src/
-    ├── main.tsx                   # Entry: calls initTelegram(), mounts React
+    ├── main.tsx                   # Entry: initTelegram() → ErrorBoundary → App
     ├── env.ts                     # SDK init + mock environment for local dev
     ├── App.tsx                    # Demo app (user info, theme, MainButton, haptics)
     ├── index.css                  # Styles, driven by --tg-theme-* CSS variables
@@ -145,6 +148,10 @@ function useMount(component: Mountable): void {
   }, [component]);
 }
 ```
+
+> **`hapticFeedback` is an exception** — it does NOT need mounting. Its methods
+> (`impactOccurred`, `notificationOccurred`, `selectionChanged`) call `postEvent`
+> directly and work immediately after `init()`.
 
 ### 3. Reactivity — signals
 
@@ -236,8 +243,8 @@ To test with real Telegram data and features:
 
 ## Deployment to GitHub Pages
 
-A GitHub Actions workflow (`.github/workflows/deploy.yml`) builds and publishes the app on
-every push to `main`.
+A GitHub Actions workflow (`.github/workflows/deploy.yml`) lints, tests, then
+builds and publishes the app on every push to `main`.
 
 ### One-time setup
 
