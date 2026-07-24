@@ -98,7 +98,7 @@ export default function App() {
       <button
         type="button"
         className="btn"
-        onClick={() => hapticFeedback.impactOccurred("medium")}
+        onClick={() => hapticFeedback.impactOccurred("heavy")}
       >
         Haptic feedback
       </button>
