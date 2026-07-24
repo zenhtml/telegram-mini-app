@@ -99,7 +99,11 @@ export default function App() {
         type="button"
         className="btn"
         onClick={() => {
-          hapticFeedback.impactOccurred("heavy");
+          try {
+            hapticFeedback.impactOccurred("heavy");
+          } catch (e) {
+            console.error("impactOccurred failed:", e);
+          }
           hapticFeedback.notificationOccurred("success");
         }}
       >
