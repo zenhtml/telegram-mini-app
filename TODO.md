@@ -1,33 +1,7 @@
 # TODO
 
-## 1. CI: добавить тесты и линтер в workflow
-
-`.github/workflows/deploy.yml` — перед шагом `Build` добавить:
-
-```yaml
-- name: Lint
-  run: npm run lint
-
-- name: Test
-  run: npm run test:run
-```
-
-## 2. Закоммитить изменения
-
-Незакоммиченные файлы после initial commit:
-
-- `vitest.config.ts` — конфиг Vitest
-- `src/test-setup.ts` — setup jest-dom matchers
-- `src/env.test.ts` — тесты isRealTelegram()
-- `src/components/ErrorBoundary.tsx` — error boundary
-- `src/components/ErrorBoundary.test.tsx` — тесты ErrorBoundary
-- `src/env.ts` — экспорт isRealTelegram
-- `src/main.tsx` — try/catch + ErrorBoundary
-- `src/index.css` — стили для error-screen
-- `package.json` / `package-lock.json` — devDeps (vitest, testing-library, jsdom)
-- `tsconfig.node.json` — include vitest.config.ts
-- `AGENTS.md` / `README.md` — обновление документации
-- `eslint.config.js` — ESLint flat config
+## 1. ~~CI: добавить тесты и линтер в workflow~~ ✅
+## 2. ~~Закоммитить изменения~~ ✅
 
 ## 3. Тесты для App.tsx
 
