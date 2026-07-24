@@ -19,6 +19,7 @@ built-in mock environment, and deploys to GitHub Pages via an included CI workfl
 - [Project structure](#project-structure)
 - [How the SDK integration works](#how-the-sdk-integration-works)
 - [Local development & the mock environment](#local-development--the-mock-environment)
+- [Testing](#testing)
 - [Connecting to Telegram](#connecting-to-telegram)
 - [Deployment to GitHub Pages](#deployment-to-github-pages)
 - [Key gotchas](#key-gotchas)
@@ -33,6 +34,7 @@ built-in mock environment, and deploys to GitHub Pages via an included CI workfl
 | Build tool     | Vite 8                          |
 | Language       | TypeScript (strict)             |
 | Telegram SDK   | `@tma.js/sdk` + `@tma.js/sdk-react` |
+| Testing        | Vitest + Testing Library + jsdom |
 | Hosting        | GitHub Pages (static, HTTPS)    |
 
 > **Why `@tma.js/sdk` and not the official `telegram-web-app.js`?**
@@ -70,12 +72,18 @@ User"), mock theme colors, and working UI controls.
 
 ## Available scripts
 
-| Command           | Description                                                        |
-| ----------------- | ------------------------------------------------------------------ |
-| `npm run dev`     | Start the Vite dev server with HMR (`host: true` exposes the LAN). |
-| `npm run build`   | Type-check (`tsc -b`) then produce a production build in `dist/`.  |
-| `npm run preview` | Preview the production build locally.                              |
-| `npm run typecheck` | Run the TypeScript compiler without emitting (`tsc -b --noEmit`). |
+| Command             | Description                                                        |
+| ------------------- | ------------------------------------------------------------------ |
+| `npm run dev`       | Start the Vite dev server with HMR (`host: true` exposes the LAN). |
+| `npm run build`     | Type-check (`tsc -b`) then produce a production build in `dist/`.  |
+| `npm run preview`   | Preview the production build locally.                              |
+| `npm run typecheck` | Run the TypeScript compiler without emitting (`tsc -b --noEmit`).  |
+| `npm test`          | Run tests in watch mode (Vitest).                                  |
+| `npm run test:run`  | Run tests once, CI-friendly (Vitest).                              |
+| `npm run lint`      | Lint with ESLint.                                                  |
+| `npm run lint:fix`  | Lint with ESLint and auto-fix.                                     |
+| `npm run format`    | Format all files with Prettier.                                    |
+| `npm run format:check` | Check formatting without writing (CI).                          |
 
 ---
 
@@ -86,15 +94,22 @@ User"), mock theme colors, and working UI controls.
 ├── .github/workflows/deploy.yml   # CI: build + deploy to GitHub Pages
 ├── index.html                     # Vite entry HTML
 ├── vite.config.ts                 # Vite config (relative base, React plugin)
+├── vitest.config.ts               # Vitest config (jsdom, globals, setup file)
+├── eslint.config.js               # ESLint flat config
 ├── tsconfig.json                  # TS project references root
 ├── tsconfig.app.json              # TS config for src/
-├── tsconfig.node.json             # TS config for vite.config.ts
+├── tsconfig.node.json             # TS config for vite.config.ts + vitest.config.ts
 └── src/
     ├── main.tsx                   # Entry: calls initTelegram(), mounts React
     ├── env.ts                     # SDK init + mock environment for local dev
     ├── App.tsx                    # Demo app (user info, theme, MainButton, haptics)
     ├── index.css                  # Styles, driven by --tg-theme-* CSS variables
-    └── vite-env.d.ts
+    ├── vite-env.d.ts
+    ├── test-setup.ts              # Vitest setup: registers jest-dom matchers
+    ├── env.test.ts                # Tests: isRealTelegram() env detection
+    └── components/
+        ├── ErrorBoundary.tsx       # Catches render errors, shows fallback UI
+        └── ErrorBoundary.test.tsx  # Tests: child rendering, error fallback
 ```
 
 ---
@@ -170,6 +185,35 @@ signal-based reactivity.
 **What does NOT work locally:** real user identity, real `initData` cryptographic validation,
 payments, biometrics, and any feature that requires the actual Telegram client to respond to
 `postEvent` calls.
+
+---
+
+## Testing
+
+Tests are written with **Vitest** and **Testing Library** in a jsdom environment.
+
+```bash
+npm test          # watch mode
+npm run test:run  # single pass (CI-friendly)
+```
+
+The config lives in `vitest.config.ts` (jsdom environment, globals enabled, CSS
+support). A setup file (`src/test-setup.ts`) registers jest-dom matchers such as
+`toBeInTheDocument`.
+
+Current test coverage:
+
+| File                              | What it tests                                                      |
+| --------------------------------- | ------------------------------------------------------------------ |
+| `src/env.test.ts`                 | `isRealTelegram()` across browser, iframe, and cross-origin states |
+| `src/components/ErrorBoundary.test.tsx` | Child rendering, error fallback UI, dev-mode stack trace     |
+
+### Error boundary
+
+`src/components/ErrorBoundary.tsx` is a class component that wraps the entire
+app. If any child throws during render, it displays a fallback screen with a
+reload button. In development mode it additionally shows the error name,
+message, and stack trace to speed up debugging.
 
 ---
 

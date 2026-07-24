@@ -4,7 +4,7 @@
 
 Telegram Mini App built with **React 19 + Vite 8 + TypeScript** and the
 **@tma.js/sdk** (`@tma.js/sdk` + `@tma.js/sdk-react`). Frontend-only; deployed
-to GitHub Pages as a static site. No backend, bot, test, or lint setup yet.
+to GitHub Pages as a static site. No backend or bot yet. Tests use Vitest.
 
 ## Commands
 
@@ -17,11 +17,14 @@ npm run lint         # eslint .
 npm run lint:fix     # eslint . --fix
 npm run format       # prettier --write .
 npm run format:check # prettier --check .
+npm test             # vitest (watch mode)
+npm run test:run     # vitest run (single pass, CI-friendly)
 ```
 
-There is **no test runner**. `build` runs type-checking first, so a failing
-`typecheck` will also fail `build`. ESLint uses flat config (`eslint.config.js`);
-Prettier config lives in `.prettierrc.json`.
+`build` runs type-checking first, so a failing `typecheck` will also fail
+`build`. ESLint uses flat config (`eslint.config.js`); Prettier config lives in
+`.prettierrc.json`. Vitest config is in `vitest.config.ts` (jsdom environment,
+globals enabled, setup file `src/test-setup.ts` for jest-dom matchers).
 
 ## Architecture
 
@@ -31,6 +34,13 @@ Prettier config lives in `.prettierrc.json`.
   Telegram environment for local development (see gotchas below).
 - **App:** `src/App.tsx` — demo of user data, theme params, `MainButton`, and
   haptic feedback. Uses a local `useMount` helper for the SDK mount lifecycle.
+- **Error boundary:** `src/components/ErrorBoundary.tsx` — class component that
+  catches render errors and shows a fallback UI with a reload button. In dev
+  mode it also displays the error stack trace.
+- **Tests:** `src/env.test.ts` tests `isRealTelegram()` across browser/iframe/
+  cross-origin scenarios; `src/components/ErrorBoundary.test.tsx` tests child
+  rendering, error fallback, and dev-mode stack trace. Uses
+  `@testing-library/react` + jest-dom matchers (setup in `src/test-setup.ts`).
 - **Deploy:** `.github/workflows/deploy.yml` builds and publishes `dist/` to
   GitHub Pages on push to `main`. `vite.config.ts` sets `base: "./"` so the
   build works under the `/<repo-name>/` sub-path.

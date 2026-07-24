@@ -36,7 +36,7 @@ function mockLaunchParams() {
  * when the real Telegram client is truly absent. `isTMA()` is async under the
  * hood and returns an unreliable value when called synchronously in a browser.
  */
-function isRealTelegram(): boolean {
+export function isRealTelegram(): boolean {
   if (typeof window === "undefined") return false;
   try {
     if (window.self !== window.top) return true;
