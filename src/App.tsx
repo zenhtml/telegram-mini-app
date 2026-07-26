@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   hapticFeedback,
   mainButton,
@@ -38,6 +38,25 @@ export default function App() {
 
   const bgColor = useSignal(themeParams.bgColor);
   const textColor = useSignal(themeParams.textColor);
+
+  const [viewportSize, setViewportSize] = React.useState({ width: 0, height: 0 });
+  const [windowSize, setWindowSize] = React.useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const updateSize = () => {
+      const vp = window.visualViewport;
+      setViewportSize({ width: vp?.width ?? 0, height: vp?.height ?? 0 });
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+
+    updateSize();
+    window.visualViewport?.addEventListener('resize', updateSize);
+    window.addEventListener('resize', updateSize);
+    return () => {
+      window.visualViewport?.removeEventListener('resize', updateSize);
+      window.removeEventListener('resize', updateSize);
+    };
+  }, []);
 
   useEffect(() => {
     miniApp.ready();
@@ -92,6 +111,18 @@ export default function App() {
         <div className="field">
           <span className="label">Text color</span>
           <span className="value">{textColor ?? "—"}</span>
+        </div>
+        <div className="field">
+          <span className="label">Viewport size</span>
+          <span className="value">
+            {viewportSize.width} × {viewportSize.height}
+          </span>
+        </div>
+        <div className="field">
+          <span className="label">Window size</span>
+          <span className="value">
+            {windowSize.width} × {windowSize.height}
+          </span>
         </div>
       </section>
 
